@@ -26,7 +26,10 @@ class PayoffMatrix:  # for two players game
         maxg = np.full(shape=len(qvals), fill_value=-100.0)
         nash_equi = -100
         coord = (-100, -100)
-        #error = 100
+        xcoord = []
+        ycoord = []
+        xerror = 100
+        yerror = 100
 
         for i in range(m):
             a = self.a[i]
@@ -46,18 +49,24 @@ class PayoffMatrix:  # for two players game
             else:
                 for line2 in lines:
                     intersection = line.intersection(line2)
-                    #print(intersection)
                     x, y = intersection.xy
                     if len(y) > 0:
-                        if y[0] > nash_equi:
-                        #if abs(y[0]-nash_e) < error:
-                            nash_equi = y[0]
-                            coord = (x[0], y[0])
-                            #error = abs(y[0]-nash_e)
+                        xcoord.append(x[0])
+                        ycoord.append(y[0])
                 lines.append(line)
+
+        nash_e = min(maxg)
+        ecoord = (qvals[maxg.argmin()], nash_e)
+
+        for i in range(len(xcoord)):
+            x = xcoord[i]
+            y = ycoord[i]
+            if abs(y-nash_e) < yerror or abs(x - ecoord[0]) < xerror:
+                yerror = abs(y-nash_e)
+                xerror = abs(x-ecoord[0])
+                coord = (x, y)
+                nash_equi = y
             
-            #nash_e = min(maxg)
-            #ecoord = (qvals[maxg.argmin()], maxg[maxg.argmin()])
 
         if display:
             plt.plot(*(coord), 'ro')
