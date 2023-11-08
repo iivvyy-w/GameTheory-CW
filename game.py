@@ -1,6 +1,7 @@
 import itertools
 import numpy as np
 import pandas as pd
+from scipy.optimize import linprog
 
 
 class Minon:
@@ -50,17 +51,19 @@ class Game:
 
     def set_minons_A(self, minons: list):
         self.minons_A = [Minon(m[0], m[1]) for m in minons]
+        self.nA = len(self.minons_A)
 
     def set_minons_B(self, minons: list):
         self.minons_B = [Minon(m[0], m[1]) for m in minons]
+        self.nB = len(self.minons_B)
 
     def get_power(self):
         power = 0
         for minon in self.minons_A:
-            power += minon.current_health + minon.current_attack
+            # power += minon.current_health + minon.current_attack
             power += minon.current_attack
         for minon in self.minons_B:
-            power -= minon.current_health + minon.current_attack
+            # power -= minon.current_health + minon.current_attack
             power -= minon.current_attack
         return power
 
@@ -91,22 +94,115 @@ class Game:
                 minon_A = self.minons_A[a[0]]
                 minon_B = self.minons_B[a[1]]
                 if not minon_A.battle(minon_B):
-                    return -100
+                    return -1000
         power = self.get_power()
         return power
 
-    def payoff_table(self):
+    def full_payoff_table(self):
         As, Bs = self.generate_strats()
-        data = np.zeros((len(As), len(Bs)))
+        d = np.zeros((len(As), len(Bs)))
         for i in range(len(As)):
             for j in range(len(Bs)):
-                data[i][j] = self.payoff(As[i], Bs[j])
-        df = pd.DataFrame(data, index=[str(A) for A in As])
-        return df
+                d[i][j] = self.payoff(As[i], Bs[j])
+        d = pd.DataFrame(d, index=[str(A) for A in As])
+        return d
+
+    def reduced_payoff_table(self):
+        d = {}
+        for index, row in self.full_payoff_table().iterrows():
+            row = tuple(row)
+            if row in d:
+                d[row] += str(index) + ', '
+            else:
+                d[row] = str(index) + ', '
+        data = list(d.keys())
+        index = list(d.values())
+        return pd.DataFrame(data, index=index)
+
+    def no_dominated_payoff_table(self):
+        d = self.reduced_payoff_table()
+        A = d.to_numpy()
+        row = list(d.index)
+        col = list(d.columns)
+
+        del_row = []
+        for i in range(len(A)):
+            for j in range(len(A)):
+                if (A[i] < A[j]).all():
+                    del_row.append(i)
+                    break
+
+        if del_row != []:
+            A = np.delete(A, del_row, axis=0)
+            row = np.delete(row, del_row, axis=0)
+
+        del_col = []
+        for i in range(len(A[0])):
+            for j in range(len(A[0])):
+                if (A[:, i] > A[:, j]).all():
+                    del_col.append(i)
+
+        if del_col != []:
+            A = np.delete(A, del_col, axis=1)
+            col = np.delete(col, del_col, axis=1)
+        return pd.DataFrame(A, index=row, columns=col)
+
+    def get_eq(self):
+        A = self.no_dominated_payoff_table()
+        A = np.c_[A, -1*np.ones(len(A)), np.ones(len(A))]
+        A = np.r_[A, [[1, 1]+[0]*(len(A[0])-2)], [[-1, -1]+[0]*(len(A[0])-2)]]
+        b = np.array([0]*(len(A) - 2) + [1, -1])
+        c = np.array([0]*(len(A[0]) - 2) + [1, -1])
+
+        lpA = linprog(b, -1*A.transpose(), c)
+        lpB = linprog(c, A, b)
+        alpha = np.around(lpA.x[:len(A)-2], decimals=4)
+        beta = np.around(lpB.x[:len(A[0])-2], decimals=4)
+        value = np.around(lpB.fun, decimals=4)
+        return list(alpha), list(beta), value
+
+    def solution(self):
+        m = len(self.minons_A)
+        n = len(self.minons_B)
+        print('****============The Solution of the Game============****')
+        print("Player A has ", np.math.factorial(m)*(n+1)**m, " strategies,") # Noqa
+        print("Player B has ", n, " strategies.")
+        print('========================================================')
+        print("The  payoffs table for this game is: ")
+        d = self.no_dominated_payoff_table()
+        print(d)
+        print('========================================================')
+        print("The Nash equilibrium of this game is: ")
+
+        alpha, beta, value = self.get_eq()
+        As = []
+        pa = []
+        Bs = []
+        pb = []
+        for i in range(len(alpha)):
+            if alpha[i] != 0:
+                As.append(d.index[i])
+                pa.append(alpha[i])
+                print(
+                    "Player A plays: ",
+                    d.index[i],  "\nwith the probability:",
+                    alpha[i])
+                print('--------------')
+        print('----------------------------')
+        for i in range(len(beta)):
+            if beta[i] != 0:
+                As.append(d.columns[i])
+                pa.append(beta[i])
+                print(
+                    "Player B plays: ",
+                    d.columns[i],  "\nwith the probability:",
+                    beta[i])
+        print("The value of the game is: ", value, '.')
+        print('****================================================****')
+        return As, pa, Bs, pb
 
 
 G = Game()
-G.set_minons_A([(1, 4), (2, 3)])
-G.set_minons_B([(2, 1), (2, 3)])
-
-print(G.payoff_table())
+G.set_minons_A([(2, 3), (4, 1), (3, 3)])
+G.set_minons_B([(3, 2), (2, 3), (2, 1)])
+G.solution()
