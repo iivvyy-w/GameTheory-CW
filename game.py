@@ -2,7 +2,7 @@ import itertools
 import numpy as np
 import pandas as pd
 from scipy.optimize import linprog
-
+from find_equi import PayoffMatrix
 
 class Minon:
     def __init__(self, current_attack: int, current_health: int):
@@ -153,9 +153,8 @@ class Game:
         A = np.r_[A, [[1, 1]+[0]*(len(A[0])-2)], [[-1, -1]+[0]*(len(A[0])-2)]]
         b = np.array([0]*(len(A) - 2) + [1, -1])
         c = np.array([0]*(len(A[0]) - 2) + [1, -1])
-
-        lpA = linprog(b, -1*A.transpose(), c)
-        lpB = linprog(c, A, b)
+        lpA = linprog(b, -1*A.transpose(), c, method='simplex')
+        lpB = linprog(c, A, b, method='simplex')
         alpha = np.around(lpA.x[:len(A)-2], decimals=4)
         beta = np.around(lpB.x[:len(A[0])-2], decimals=4)
         value = np.around(lpB.fun, decimals=4)
@@ -203,6 +202,6 @@ class Game:
 
 
 G = Game()
-G.set_minons_A([(2, 3), (4, 1), (3, 3)])
-G.set_minons_B([(3, 2), (2, 3), (2, 1)])
+G.set_minons_A([(2, 3), (4, 1)])
+G.set_minons_B([(3, 2), (2, 3)])
 G.solution()
