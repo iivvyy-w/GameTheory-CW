@@ -1,0 +1,9 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gametheorycw1" 
+#name of package pip calls, not necessarily the name of 1 package inside the folder
+#hatchling calls all packages inside the repositry
+version = "0.1"

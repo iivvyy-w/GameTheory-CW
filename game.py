@@ -2,7 +2,7 @@ import itertools
 import numpy as np
 import pandas as pd
 from scipy.optimize import linprog
-from find_equi import PayoffMatrix
+from Equi import PayoffMatrix
 
 class Minon:
     def __init__(self, current_attack: int, current_health: int):

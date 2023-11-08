@@ -6,11 +6,10 @@ from shapely.geometry import LineString
 
 
 class PayoffMatrix:  # for two players game 
-    def __init__(self, index, columns, payoff):
-        self.a = index  # dataframe's index of A's strategies
-        self.b = columns  # dataframe's columns of B's strategies 0,1
-        self.payoff = payoff  # payoff matrix as a list of lists
-        self.matrix = pd.DataFrame(payoff, index=self.a, columns=self.b) # payoff matrix expressed as dataframe
+    def __init__(self, payoff):
+        self.a = payoff.index  # dataframe's index of A's strategies
+        self.b = payoff.columns  # dataframe's columns of B's strategies 0,1
+        self.matrix = payoff # payoff matrix expressed as dataframe
 
     def findpayoff(self, a, b):
         return self.matrix.loc[a][b]
@@ -81,7 +80,8 @@ class PayoffMatrix:  # for two players game
 index = [0, 1, 2]
 columns = [0, 1]
 payoff = [[-2, 6], [3, 1], [4, -1]]
-pm = PayoffMatrix(index, columns, payoff)
+df = pd.DataFrame(payoff, index=index, columns=columns)
+pm = PayoffMatrix(df)
 print(pm.matrix)
 print(pm.findpayoff(0, 0))
 print(pm.equilibrium(display=True))
