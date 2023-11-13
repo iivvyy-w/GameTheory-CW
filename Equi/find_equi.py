@@ -78,11 +78,15 @@ class PayoffMatrix:  # for two players game
             index_a.append(lines.index(l))
 
         if display:  # showing the lines, maximum of each q and equilibrium
-            plt.plot(*(coord), 'ro')
+            plt.plot(*(coord), 'ro', label=coord)
             plt.plot(qvals, maxg, 'k:', label='maximum')
+            plt.xlabel('q')
+            plt.ylabel('g')
+            plt.title('The upper envelop diagram of the example.')
             plt.grid()
             plt.legend()
             plt.show()
+            # plt.savefig("E1.jpg", dpi=300, bbox_inches='tight')
 
         return nash_equi, coord, index_a
 
@@ -105,15 +109,16 @@ class PayoffMatrix:  # for two players game
         return (q, 1-q)
 
 
-index = [0, 1, 2]
-columns = [0, 1]
-payoff = [[-2, 6], [3, 1], [4, -1]]
-df = pd.DataFrame(payoff, index=index, columns=columns)
-pm = PayoffMatrix(df)
-print(pm.matrix)
+# test code
+# index = [0, 1, 2]
+# columns = [0, 1]
+# payoff = [[-2, 6], [3, 1], [4, -1]]
+# df = pd.DataFrame(payoff, index=index, columns=columns)
+# pm = PayoffMatrix(df)
+# print(pm.matrix)
 # print(pm.findpayoff(0, 0))
-print(pm.equilibrium(display=True))
-print(pm.equilibrium_a())
-print(pm.equilibrium_b())
+# print(pm.equilibrium(display=True))
+# print(pm.equilibrium_a())
+# print(pm.equilibrium_b())
 # nash, coord = pm.equilibrium()
 # print(nash)
