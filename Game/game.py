@@ -190,8 +190,8 @@ class Game:
         print('----------------------------')
         for i in range(len(beta)):
             if beta[i] != 0:
-                As.append(d.columns[i])
-                pa.append(beta[i])
+                Bs.append(d.columns[i])
+                pb.append(beta[i])
                 print(
                     "Player B plays: ",
                     d.columns[i],  "\nwith the probability:",
