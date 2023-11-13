@@ -4,7 +4,7 @@ import pandas as pd
 from scipy.optimize import linprog
 from Equi import PayoffMatrix
 
-class Minon:
+class Minion:
     def __init__(self, current_attack: int, current_health: int):
         self.attack = current_attack
         self.health = current_health
@@ -50,11 +50,11 @@ class Game:
         self.minons_B = []
 
     def set_minons_A(self, minons: list):
-        self.minons_A = [Minon(m[0], m[1]) for m in minons]
+        self.minons_A = [Minion(m[0], m[1]) for m in minons]
         self.nA = len(self.minons_A)
 
     def set_minons_B(self, minons: list):
-        self.minons_B = [Minon(m[0], m[1]) for m in minons]
+        self.minons_B = [Minion(m[0], m[1]) for m in minons]
         self.nB = len(self.minons_B)
 
     def get_power(self):

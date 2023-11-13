@@ -71,6 +71,9 @@ class PayoffMatrix:  # for two players game
                 nash_equi = y
                 involved_line = all_line[i]
 
+        # if ycoord.count(nash_equi) > 1:
+            # indices = [i for i, x in enumerate(ycoord) if x == nash_equi]
+
         for l in involved_line:
             index_a.append(lines.index(l))
 
@@ -108,9 +111,9 @@ payoff = [[-2, 6], [3, 1], [4, -1]]
 df = pd.DataFrame(payoff, index=index, columns=columns)
 pm = PayoffMatrix(df)
 print(pm.matrix)
-#print(pm.findpayoff(0, 0))
+# print(pm.findpayoff(0, 0))
 print(pm.equilibrium(display=True))
 print(pm.equilibrium_a())
 print(pm.equilibrium_b())
-#nash, coord = pm.equilibrium()
-#print(nash)
+# nash, coord = pm.equilibrium()
+# print(nash)
