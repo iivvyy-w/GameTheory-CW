@@ -150,7 +150,7 @@ class Game:
     def get_eq(self):
         A = self.no_dominated_payoff_table()
         A = np.c_[A, -1*np.ones(len(A)), np.ones(len(A))]
-        A = np.r_[A, [[1, 1]+[0]*(len(A[0])-2)], [[-1, -1]+[0]*(len(A[0])-2)]]
+        A = np.r_[A, [[1]*(len(A[0])-2) + [0, 0]], [[-1]*(len(A[0])-2) + [0, 0]]]
         b = np.array([0]*(len(A) - 2) + [1, -1])
         c = np.array([0]*(len(A[0]) - 2) + [1, -1])
         lpA = linprog(b, -1*A.transpose(), c, method='simplex')
