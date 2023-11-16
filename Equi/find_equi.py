@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import sympy as sp
 import matplotlib.pyplot as plt
 from shapely.geometry import LineString
@@ -22,12 +21,12 @@ class PayoffMatrix:  # for two players game
         qvals = np.arange(0, 1.001, 0.001)
         lines = []  # store each Linestrings
         plt.figure()
-        maxg = np.full(shape=len(qvals), fill_value=-100.0)
-        nash_equi = -100
-        coord = (-100, -100)
+        maxg = np.full(shape=len(qvals), fill_value=-100.0)  # store upper envelope
+        nash_equi = -100  # final equi value
+        coord = (-100, -100)  # coordinates of min-max
         involved_line = []  # the list stores the lines that intersects at equilibrium for b
         xcoord = []
-        ycoord = []
+        ycoord = []  # coordinates of intersections
         all_line = []  # the list stores all intersected line pairs at every intersection
         xerror = 100
         yerror = 100
@@ -38,9 +37,9 @@ class PayoffMatrix:  # for two players game
             g = self.findpayoff(a, 0)*q + self.findpayoff(a, 1)*(1-q)
             lam_g = sp.lambdify(q, g, modules=['numpy'])
             gvals = lam_g(qvals)
-            if isinstance(gvals, float):  # float or int?
+            if isinstance(gvals, float):
                 gvals = np.full(shape=len(qvals), fill_value=g)
-            plt.plot(qvals, gvals, label=g)
+            plt.plot(qvals, gvals, label=g)  # plot g(a_i, beta)
             for r in range(len(gvals)):
                 if gvals[r] > maxg[r]:
                     maxg[r] = gvals[r]
@@ -48,7 +47,7 @@ class PayoffMatrix:  # for two players game
             line = LineString(np.column_stack((qvals, gvals)))
             if lines == []:
                 lines.append(line)
-            else:
+            else:  # find intersections
                 for line2 in lines:
                     intersection = line.intersection(line2)
                     x, y = intersection.xy
@@ -59,9 +58,9 @@ class PayoffMatrix:  # for two players game
                 lines.append(line)
 
         nash_e = min(maxg)
-        ecoord = (qvals[maxg.argmin()], nash_e)
+        ecoord = (qvals[maxg.argmin()], nash_e)  # min-max of upper envelope plotted
 
-        for i in range(len(xcoord)):
+        for i in range(len(xcoord)):  # the closest exact value to plotted min-max
             x = xcoord[i]
             y = ycoord[i]
             if abs(y-nash_e) < yerror or abs(x - ecoord[0]) < xerror:
@@ -71,9 +70,6 @@ class PayoffMatrix:  # for two players game
                 nash_equi = y
                 involved_line = all_line[i]
 
-        # if ycoord.count(nash_equi) > 1:
-            # indices = [i for i, x in enumerate(ycoord) if x == nash_equi]
-
         for l in involved_line:
             index_a.append(lines.index(l))
 
@@ -82,7 +78,7 @@ class PayoffMatrix:  # for two players game
             plt.plot(qvals, maxg, 'k:', label='maximum')
             plt.xlabel('q')
             plt.ylabel('g')
-            plt.title('The upper envelop diagram of the example.')
+            # plt.title('The upper envelope diagram of the example.')
             plt.grid()
             plt.legend()
             plt.show()
@@ -91,6 +87,9 @@ class PayoffMatrix:  # for two players game
         return nash_equi, coord, index_a
 
     def equilibrium_a(self):
+        """
+        Use sympy to calculate the mixed strategies for A after min-max is found.
+        """
         nash_equi, coord, index_a = self.equilibrium()
 
         if len(index_a) == 2:
@@ -107,18 +106,3 @@ class PayoffMatrix:  # for two players game
         nash, coord, index_a = self.equilibrium()
         q = coord[0]
         return (q, 1-q)
-
-
-# test code
-# index = [0, 1, 2]
-# columns = [0, 1]
-# payoff = [[-2, 6], [3, 1], [4, -1]]
-# df = pd.DataFrame(payoff, index=index, columns=columns)
-# pm = PayoffMatrix(df)
-# print(pm.matrix)
-# print(pm.findpayoff(0, 0))
-# print(pm.equilibrium(display=True))
-# print(pm.equilibrium_a())
-# print(pm.equilibrium_b())
-# nash, coord = pm.equilibrium()
-# print(nash)

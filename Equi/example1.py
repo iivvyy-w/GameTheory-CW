@@ -1,3 +1,4 @@
+# This python file does a specific example using developed code.
 from Equi import PayoffMatrix
 from Game import Game
 
@@ -9,3 +10,4 @@ print(pm.matrix)
 print(pm.equilibrium(display=True))
 print(pm.equilibrium_a())
 print(pm.equilibrium_b())
+print(G.full_payoff_table())
